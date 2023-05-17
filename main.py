@@ -130,13 +130,6 @@ if __name__ == "__main__":
     # Render the chart in Streamlit
     st.plotly_chart(fig)
 
-    # # Group the DataFrame by 'jobPostingDate' and count the number of unique titles
-    # grouped_df = df.groupby('JobPostingDate')['Title'].nunique().reset_index(name='count')
-    #
-    # # Create a grouped bar chart using Plotly Express
-    # st.plotly_chart(px.bar(grouped_df, x='JobPostingDate', y='count'))
-
-
 
     # 2. Location with highest number of jobs
 
