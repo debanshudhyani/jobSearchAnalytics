@@ -2,23 +2,24 @@ import gspread
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 
 def extract_info_from_file(rawlst):
 
     # Provide a list of keywords to search for
     keywords = ['Full-time', 'Contract']
-
+    info_list = []
     for item in rawlst:
-        mail_date = rawlst[0].get('date')
-        mail_body = rawlst[0].get('body')
+        mail_date = item.get('date')
+        mail_body = item.get('body')
         mail_body_lst = mail_body.replace('\r','').split('\n')
 
         # Remove spaces between lines
         lines = [line.strip() for line in mail_body_lst if line.strip()]
 
         # Process each line and extract information
-        info_list = []
+
         for i, line in enumerate(lines):
             # Check if any of the keywords are present in the line
             if any(keyword in line for keyword in keywords):
@@ -40,14 +41,14 @@ def extract_info_from_file(rawlst):
 
                 # Extract the block of lines
                 info = {
-                    "title" : lines[start_index],
-                    "org" :  lines[start_index + 1],
-                    "location": lines[start_index + 2],
-                    "source": lines[start_index + 3],
-                    "jobType": lines[start_index + 4],
-                    "jobPostingDate" : mail_date
+                    "Title" : lines[start_index],
+                    "Org" :  lines[start_index + 1],
+                    "Location": lines[start_index + 2].replace("Canada"," "),
+                    "Source": lines[start_index + 3].replace("via", " "),
+                    "JobType": lines[start_index + 4],
+                    "JobPostingDate" : mail_date
                 }
-                #info = '\n'.join(lines[start_index:end_index + 1])
+
 
                 # Add the extracted information to the list
                 info_list.append(info)
@@ -64,6 +65,9 @@ def read_google_sheet():
 
 def createDatafrme(formatedList):
     df = pd.DataFrame(formatedList)
+
+    # Convert the data type of the column to date
+    df['JobPostingDate'] = pd.to_datetime(df['JobPostingDate']).dt.date
     return df
 
 if __name__ == "__main__":
@@ -76,14 +80,93 @@ if __name__ == "__main__":
     #create a dataframe
     df = createDatafrme(formatedList)
 
+
     #Start preparing the dashboard
     st.title("Job Search analytics")
 
-    st.table(df)
+    # Create grid options
+    grid_options = GridOptionsBuilder.from_dataframe(df)
 
-    # 1. Number of jobs per job title
-    st.plotly_chart(px.histogram(df.title, x="title",
-                  title="Distribution of Athletes age"))
+    # Configure sidebar and enable row selection
+    grid_options.configure_side_bar()
+    #grid_options.configure_selection('single')
+
+    # Render the DataFrame with sidebar and row selection using st_aggrid
+    AgGrid(df[:10], gridOptions=grid_options.build())
+
+
+
+    #0 . number of jobs as per date in graph
+
+    # Count the number of jobs posted on each date
+    job_count = df['JobPostingDate'].value_counts().reset_index()
+    job_count.columns = ['JobPostingDate', 'Count']
+
+    # Create a line chart using Plotly Express
+    fig = px.line(job_count, x='JobPostingDate', y='Count')
+
+    # Set the chart title
+    fig.update_layout(title='Number of Jobs Posted by Date')
+
+    # Format the x-axis tick labels to display only the date
+    fig.update_xaxes(tickformat="%Y-%m-%d")
+
+    # Render the chart in Streamlit
+    st.plotly_chart(fig)
+
+
+    # 1. Number of jobs posting as per date
+
+    # Group the DataFrame by 'JobPostingDate' and 'Location' and count the number of titles
+    grouped_df = df.groupby(['JobPostingDate', 'Location']).size().reset_index(name='Count')
+
+    # Create a grouped bar chart using Plotly Express
+    fig = px.bar(grouped_df, x='JobPostingDate', y='Count', color='Location',
+                 title='Number of Titles Posted by Date and Location')
+
+    # Set the x-axis tick format to show only the date
+    fig.update_layout(xaxis=dict(type='category'))
+
+    # Render the chart in Streamlit
+    st.plotly_chart(fig)
+
+    # # Group the DataFrame by 'jobPostingDate' and count the number of unique titles
+    # grouped_df = df.groupby('JobPostingDate')['Title'].nunique().reset_index(name='count')
+    #
+    # # Create a grouped bar chart using Plotly Express
+    # st.plotly_chart(px.bar(grouped_df, x='JobPostingDate', y='count'))
+
+
+
+    # 2. Location with highest number of jobs
+
+    st.plotly_chart(px.histogram(df.Location, x="Location", title="Location with most number of jobs"))
+
+    # 3. create drop down
+    options=df["Location"].unique().tolist()
+    selected_location=st.selectbox(
+    'Select the location',
+    options)
+
+    st.write('You selected:', selected_location)
+
+    # now create a graph as per the selected location
+    filtered_df = df[df['Location'] == selected_location]
+    fig = px.histogram(filtered_df, x='Title', title='Job Titles')
+    st.plotly_chart(fig)
+
+    #4. source of jobs
+
+    st.plotly_chart(px.histogram(df.Source, x="Source", title="sites with most number of jobs"))
+
+    #5. Types of job ratio
+
+    st.plotly_chart(px.histogram(df.JobType, x="JobType", title="Job Type Discription"))
+
+    #6. Companies with most number oj jobs
+
+    st.plotly_chart(px.histogram(df.Org, x="Org", title="Organisation"))
+
 
 
 
