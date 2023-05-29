@@ -99,7 +99,8 @@ if __name__ == "__main__":
     #0 . number of jobs as per date in graph
 
     # Count the number of jobs posted on each date
-    job_count = df['JobPostingDate'].value_counts().reset_index()
+    df.sort_values('JobPostingDate', inplace=True)
+    job_count = df['JobPostingDate'].value_counts().sort_index().reset_index()
     job_count.columns = ['JobPostingDate', 'Count']
 
     # Create a line chart using Plotly Express
@@ -118,6 +119,7 @@ if __name__ == "__main__":
     # 1. Number of jobs posting as per date
 
     # Group the DataFrame by 'JobPostingDate' and 'Location' and count the number of titles
+    df.sort_values('JobPostingDate', inplace=True)
     grouped_df = df.groupby(['JobPostingDate', 'Location']).size().reset_index(name='Count')
 
     # Create a grouped bar chart using Plotly Express
@@ -125,7 +127,7 @@ if __name__ == "__main__":
                  title='Number of Titles Posted by Date and Location')
 
     # Set the x-axis tick format to show only the date
-    fig.update_layout(xaxis=dict(type='category'))
+    fig.update_layout(xaxis=dict(type='category',categoryorder='category ascending'))
 
     # Render the chart in Streamlit
     st.plotly_chart(fig)
