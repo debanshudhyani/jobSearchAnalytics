@@ -82,13 +82,6 @@ if __name__ == "__main__":
 
 
     #Start preparing the dashboard
-    # st.title("Job Search analytics")
-    #
-    # # Create grid options
-    # grid_options = GridOptionsBuilder.from_dataframe(df)
-    #
-    # # Render the DataFrame with vertical sidebar and row selection
-    # AgGrid(df[:10], fit_columns_on_grid_load=True)
 
     st.set_page_config(page_title="Job Search Analytics",
                        page_icon=":bar_chart:",
