@@ -86,6 +86,7 @@ if __name__ == "__main__":
     st.set_page_config(page_title="Job Search Analytics",
                        page_icon=":bar_chart:",
                        layout="wide")
+    st.title("Job Search Analytics")
 
     df = df.replace(r'^\s*$', float('NaN'), regex=True)  # Replace blanks by NaN
     df.dropna(inplace=True)
