@@ -152,29 +152,6 @@ if __name__ == "__main__":
 
     #0 . number of jobs as per date in graph
 
-    # # Count the number of jobs posted on each date
-    # df_selection.sort_values(analysis_col, inplace=True)
-    # job_count = df_selection[analysis_col].value_counts().sort_index().reset_index()
-    # job_count.columns = [analysis_col, 'Count']
-    #
-    # # Sort the month column chronologically
-    # month_order = pd.to_datetime(job_count[analysis_col], format="%B").dt.month
-    # job_count = job_count.iloc[month_order.argsort()]
-    #
-    # # Create a line chart using Plotly Express
-    # fig = px.line(job_count, x=analysis_col, y='Count')
-    #
-    # # Set the chart title
-    # fig.update_layout(title='Number of Jobs Posted by Date')
-    #
-    # # Format the x-axis tick labels to display only the date
-    # fig.update_xaxes(tickformat="%Y-%m-%d")
-    #
-    # # Render the chart in Streamlit
-    # st.plotly_chart(fig)
-
-    # Assuming you have a DataFrame called df_selection with a column named analysis_col containing the dates
-
     # Sort the DataFrame by the analysis column
     df_selection.sort_values(analysis_col, inplace=True)
 
