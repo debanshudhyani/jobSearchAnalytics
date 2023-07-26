@@ -160,7 +160,7 @@ if __name__ == "__main__":
     job_count.columns = [analysis_col, 'Count']
 
     # Convert the analysis column to datetime
-    job_count[analysis_col] = pd.to_datetime(job_count[analysis_col])
+    job_count[analysis_col] = pd.to_datetime(job_count[analysis_col],format='%B')
 
     # Sort the DataFrame by the analysis column again to ensure chronological order
     job_count.sort_values(analysis_col, inplace=True)
